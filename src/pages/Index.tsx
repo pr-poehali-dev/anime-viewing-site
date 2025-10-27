@@ -186,6 +186,25 @@ const Index = () => {
     return { hours, days, episodes: totalEpisodes };
   };
 
+  const calculateLevel = () => {
+    const { hours } = calculateWatchTime();
+    const level = Math.floor(hours / 10) + 1;
+    const currentLevelHours = hours % 10;
+    const nextLevelHours = 10;
+    const progress = (currentLevelHours / nextLevelHours) * 100;
+    
+    return { level, currentLevelHours, nextLevelHours, progress };
+  };
+
+  const getLevelTitle = (level: number) => {
+    if (level < 5) return 'Начинающий зритель';
+    if (level < 10) return 'Любитель аниме';
+    if (level < 20) return 'Фанат аниме';
+    if (level < 30) return 'Эксперт';
+    if (level < 50) return 'Мастер';
+    return 'Легенда аниме';
+  };
+
   const getAnimeWatchTime = (episodes: number) => {
     const totalMinutes = episodes * 24;
     const hours = Math.floor(totalMinutes / 60);
@@ -244,13 +263,35 @@ const Index = () => {
                     <Icon name="User" size={20} />
                     {Object.keys(userAnimeList).length > 0 && (
                       <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {Object.keys(userAnimeList).length}
+                        {calculateLevel().level}
                       </span>
                     )}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuContent align="end" className="w-80">
                   <DropdownMenuLabel>Мой профиль</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <div className="px-2 py-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Icon name="Zap" size={18} className="text-primary" />
+                        <span className="font-semibold">Уровень {calculateLevel().level}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{getLevelTitle(calculateLevel().level)}</span>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="relative w-full h-2 bg-secondary rounded-full overflow-hidden">
+                        <div 
+                          className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-purple-500 transition-all duration-500"
+                          style={{ width: `${calculateLevel().progress}%` }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>{calculateLevel().currentLevelHours} ч / {calculateLevel().nextLevelHours} ч</span>
+                        <span>до уровня {calculateLevel().level + 1}</span>
+                      </div>
+                    </div>
+                  </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setShowUserListDialog(true)} className="cursor-pointer">
                     <Icon name="Library" size={18} className="mr-2" />
@@ -1018,26 +1059,50 @@ const Index = () => {
             <DialogTitle className="text-2xl">Мой список аниме</DialogTitle>
           </DialogHeader>
           
-          <div className="mb-6 p-4 bg-gradient-to-r from-primary/10 to-purple-500/10 rounded-lg border border-primary/20">
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold">Статистика просмотра</h3>
-                <div className="flex items-center gap-6 text-sm flex-wrap">
-                  <div className="flex items-center gap-2">
-                    <Icon name="Clock" size={16} className="text-primary" />
-                    <span className="text-muted-foreground">Время:</span>
-                    <span className="font-bold text-foreground">{calculateWatchTime().hours} ч</span>
+          <div className="mb-6 space-y-4">
+            <div className="p-4 bg-gradient-to-r from-primary/10 to-purple-500/10 rounded-lg border border-primary/20">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                    {calculateLevel().level}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Icon name="Calendar" size={16} className="text-primary" />
-                    <span className="text-muted-foreground">Дней:</span>
-                    <span className="font-bold text-foreground">{calculateWatchTime().days}</span>
+                  <div>
+                    <h3 className="text-lg font-semibold">Уровень {calculateLevel().level}</h3>
+                    <p className="text-sm text-muted-foreground">{getLevelTitle(calculateLevel().level)}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Icon name="Film" size={16} className="text-primary" />
-                    <span className="text-muted-foreground">Серий:</span>
-                    <span className="font-bold text-foreground">{calculateWatchTime().episodes}</span>
-                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="relative w-full h-3 bg-secondary rounded-full overflow-hidden">
+                  <div 
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary via-purple-500 to-pink-500 transition-all duration-500 rounded-full"
+                    style={{ width: `${calculateLevel().progress}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{calculateLevel().currentLevelHours} ч / {calculateLevel().nextLevelHours} ч</span>
+                  <span className="font-semibold text-primary">До уровня {calculateLevel().level + 1}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-card rounded-lg border">
+              <h3 className="text-lg font-semibold mb-3">Статистика просмотра</h3>
+              <div className="flex items-center gap-6 text-sm flex-wrap">
+                <div className="flex items-center gap-2">
+                  <Icon name="Clock" size={16} className="text-primary" />
+                  <span className="text-muted-foreground">Время:</span>
+                  <span className="font-bold text-foreground">{calculateWatchTime().hours} ч</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Icon name="Calendar" size={16} className="text-primary" />
+                  <span className="text-muted-foreground">Дней:</span>
+                  <span className="font-bold text-foreground">{calculateWatchTime().days}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Icon name="Film" size={16} className="text-primary" />
+                  <span className="text-muted-foreground">Серий:</span>
+                  <span className="font-bold text-foreground">{calculateWatchTime().episodes}</span>
                 </div>
               </div>
             </div>
