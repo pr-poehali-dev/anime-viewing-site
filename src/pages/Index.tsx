@@ -326,6 +326,7 @@ const Index = () => {
               <TabsTrigger value="all">Все</TabsTrigger>
               <TabsTrigger value="trending">Популярное</TabsTrigger>
               <TabsTrigger value="new">Новинки</TabsTrigger>
+              <TabsTrigger value="genres">Жанры</TabsTrigger>
               <TabsTrigger value="favorites">Избранное</TabsTrigger>
             </TabsList>
 
@@ -516,6 +517,73 @@ const Index = () => {
                     </div>
                   </Card>
                 ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="genres">
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  {allGenres.map((genre) => {
+                    const genreAnime = animeData.filter(a => a.genres.includes(genre));
+                    const genreIcons: Record<string, string> = {
+                      'Боевик': 'Swords',
+                      'Приключения': 'Compass',
+                      'Фэнтези': 'Wand2',
+                      'Романтика': 'Heart',
+                      'Комедия': 'Laugh',
+                      'Драма': 'Drama',
+                      'Школа': 'School',
+                      'Спорт': 'Trophy',
+                      'Sci-Fi': 'Rocket',
+                      'Киберпанк': 'Cpu',
+                      'Ужасы': 'Ghost',
+                      'Мистика': 'Eye',
+                      'Психологическое': 'Brain',
+                      'Сверхъестественное': 'Sparkles',
+                      'Повседневность': 'Coffee',
+                      'Сёнен': 'Zap',
+                      'Сёдзё': 'Flower2',
+                      'Триллер': 'AlertTriangle'
+                    };
+                    
+                    return (
+                      <Card 
+                        key={genre}
+                        className="group relative overflow-hidden cursor-pointer hover-scale transition-all duration-300 hover:shadow-xl"
+                        onClick={() => {
+                          setSelectedGenre(genre);
+                          document.querySelector('[value="all"]')?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                      >
+                        <div className="aspect-square relative">
+                          {genreAnime[0] && (
+                            <>
+                              <img 
+                                src={genreAnime[0].image} 
+                                alt={genre}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                            </>
+                          )}
+                          <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
+                            <Icon 
+                              name={genreIcons[genre] || 'Tag'} 
+                              size={32} 
+                              className="text-white mb-2 drop-shadow-lg"
+                            />
+                            <h3 className="font-bold text-white text-center text-lg drop-shadow-lg">
+                              {genre}
+                            </h3>
+                            <p className="text-xs text-white/90 mt-1 drop-shadow">
+                              {genreAnime.length} аниме
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
               </div>
             </TabsContent>
 
