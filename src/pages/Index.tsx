@@ -19,6 +19,7 @@ interface Anime {
   description: string;
   year: number;
   status: string;
+  popularDub?: string;
 }
 
 type WatchStatus = 'watching' | 'completed' | 'planned' | 'dropped' | 'on-hold';
@@ -37,7 +38,8 @@ const animeData: Anime[] = [
     genres: ["Фэнтези", "Приключения", "Боевик", "Сёнен"],
     description: "Эпическая история о герое с магическими способностями, который должен спасти мир от темных сил.",
     year: 2024,
-    status: "ongoing"
+    status: "ongoing",
+    popularDub: "AniLibria"
   },
   {
     id: 2,
@@ -48,7 +50,8 @@ const animeData: Anime[] = [
     genres: ["Повседневность", "Комедия", "Школа", "Сёдзё"],
     description: "Веселые истории из жизни школьников, их дружба и повседневные приключения.",
     year: 2024,
-    status: "ongoing"
+    status: "ongoing",
+    popularDub: "AniDub"
   },
   {
     id: 3,
@@ -59,7 +62,8 @@ const animeData: Anime[] = [
     genres: ["Киберпанк", "Боевик", "Sci-Fi", "Триллер"],
     description: "В футуристическом мегаполисе разворачивается история о борьбе за свободу в мире высоких технологий.",
     year: 2024,
-    status: "ongoing"
+    status: "ongoing",
+    popularDub: "SHIZA Project (субтитры)"
   },
   {
     id: 4,
@@ -70,7 +74,8 @@ const animeData: Anime[] = [
     genres: ["Романтика", "Драма", "Сёдзё", "Школа"],
     description: "Трогательная история любви двух старшеклассников, которые учатся преодолевать жизненные трудности вместе.",
     year: 2023,
-    status: "completed"
+    status: "completed",
+    popularDub: "AniLibria"
   },
   {
     id: 5,
@@ -81,7 +86,8 @@ const animeData: Anime[] = [
     genres: ["Ужасы", "Мистика", "Психологическое", "Сверхъестественное"],
     description: "Мрачная история о группе друзей, столкнувшихся с паранормальными явлениями в заброшенной школе.",
     year: 2024,
-    status: "ongoing"
+    status: "ongoing",
+    popularDub: "AniDub"
   },
   {
     id: 6,
@@ -92,7 +98,8 @@ const animeData: Anime[] = [
     genres: ["Спорт", "Сёнен", "Драма", "Школа"],
     description: "Вдохновляющая история баскетбольной команды, стремящейся стать чемпионами страны.",
     year: 2024,
-    status: "ongoing"
+    status: "ongoing",
+    popularDub: "AniLibria"
   }
 ];
 
@@ -177,6 +184,17 @@ const Index = () => {
     const days = Math.floor(hours / 24);
     
     return { hours, days, episodes: totalEpisodes };
+  };
+
+  const getAnimeWatchTime = (episodes: number) => {
+    const totalMinutes = episodes * 24;
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    
+    if (hours > 0) {
+      return `${hours} ч ${minutes} мин`;
+    }
+    return `${minutes} мин`;
   };
 
   const allGenres = Array.from(new Set(animeData.flatMap(anime => anime.genres)));
@@ -858,7 +876,7 @@ const Index = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 flex-wrap">
                     <div className="flex items-center gap-2">
                       <Icon name="Star" className="text-yellow-400" size={20} />
                       <span className="font-semibold">{selectedAnime.rating}</span>
@@ -870,6 +888,10 @@ const Index = () => {
                     <div className="flex items-center gap-2">
                       <Icon name="Film" size={20} />
                       <span>{selectedAnime.episodes} серий</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Icon name="Clock" size={20} className="text-primary" />
+                      <span className="font-semibold">{getAnimeWatchTime(selectedAnime.episodes)}</span>
                     </div>
                     <Badge variant={selectedAnime.status === 'ongoing' ? 'default' : 'secondary'}>
                       {selectedAnime.status === 'ongoing' ? 'Онгоинг' : 'Завершено'}
@@ -889,6 +911,19 @@ const Index = () => {
                       ))}
                     </div>
                   </div>
+
+                  {selectedAnime.popularDub && (
+                    <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                      <div className="flex items-center gap-2">
+                        <Icon name="TrendingUp" size={18} className="text-primary" />
+                        <span className="text-sm">
+                          <span className="text-muted-foreground">Чаще всего смотрят в озвучке:</span>
+                          {' '}
+                          <span className="font-semibold text-foreground">{selectedAnime.popularDub}</span>
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
                   <div>
                     <h4 className="font-semibold mb-3">Выбор озвучки</h4>
