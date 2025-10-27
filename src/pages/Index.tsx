@@ -34,7 +34,7 @@ const animeData: Anime[] = [
     image: "https://cdn.poehali.dev/projects/e7346c9b-3751-4264-976f-9cf02e68ea90/files/3f30791a-6476-4b2e-888c-be4cd6c555c5.jpg",
     rating: 9.2,
     episodes: 24,
-    genres: ["Фэнтези", "Приключения", "Боевик"],
+    genres: ["Фэнтези", "Приключения", "Боевик", "Сёнен"],
     description: "Эпическая история о герое с магическими способностями, который должен спасти мир от темных сил.",
     year: 2024,
     status: "ongoing"
@@ -45,7 +45,7 @@ const animeData: Anime[] = [
     image: "https://cdn.poehali.dev/projects/e7346c9b-3751-4264-976f-9cf02e68ea90/files/32d9b206-0a9d-48a5-8871-458ff6eda601.jpg",
     rating: 8.5,
     episodes: 12,
-    genres: ["Повседневность", "Комедия", "Школа"],
+    genres: ["Повседневность", "Комедия", "Школа", "Сёдзё"],
     description: "Веселые истории из жизни школьников, их дружба и повседневные приключения.",
     year: 2024,
     status: "ongoing"
@@ -56,8 +56,41 @@ const animeData: Anime[] = [
     image: "https://cdn.poehali.dev/projects/e7346c9b-3751-4264-976f-9cf02e68ea90/files/928e2800-9c9f-42a6-9073-ed5c85132361.jpg",
     rating: 9.5,
     episodes: 24,
-    genres: ["Киберпанк", "Боевик", "Sci-Fi"],
+    genres: ["Киберпанк", "Боевик", "Sci-Fi", "Триллер"],
     description: "В футуристическом мегаполисе разворачивается история о борьбе за свободу в мире высоких технологий.",
+    year: 2024,
+    status: "ongoing"
+  },
+  {
+    id: 4,
+    title: "Сердца в цвету",
+    image: "https://cdn.poehali.dev/projects/e7346c9b-3751-4264-976f-9cf02e68ea90/files/bf552791-9c37-4595-b12a-61b901ba482b.jpg",
+    rating: 8.8,
+    episodes: 24,
+    genres: ["Романтика", "Драма", "Сёдзё", "Школа"],
+    description: "Трогательная история любви двух старшеклассников, которые учатся преодолевать жизненные трудности вместе.",
+    year: 2023,
+    status: "completed"
+  },
+  {
+    id: 5,
+    title: "Тени Прошлого",
+    image: "https://cdn.poehali.dev/projects/e7346c9b-3751-4264-976f-9cf02e68ea90/files/6b70a875-0940-4f99-9d03-c5fdb932c1af.jpg",
+    rating: 9.0,
+    episodes: 12,
+    genres: ["Ужасы", "Мистика", "Психологическое", "Сверхъестественное"],
+    description: "Мрачная история о группе друзей, столкнувшихся с паранормальными явлениями в заброшенной школе.",
+    year: 2024,
+    status: "ongoing"
+  },
+  {
+    id: 6,
+    title: "Путь к Победе",
+    image: "https://cdn.poehali.dev/projects/e7346c9b-3751-4264-976f-9cf02e68ea90/files/26d1f5f0-ec37-495c-91d1-8efb7ea69f2c.jpg",
+    rating: 8.9,
+    episodes: 25,
+    genres: ["Спорт", "Сёнен", "Драма", "Школа"],
+    description: "Вдохновляющая история баскетбольной команды, стремящейся стать чемпионами страны.",
     year: 2024,
     status: "ongoing"
   }
