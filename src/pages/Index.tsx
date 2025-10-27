@@ -162,6 +162,23 @@ const Index = () => {
     return Object.values(userAnimeList).filter(s => s === status).length;
   };
 
+  const calculateWatchTime = () => {
+    const completedAnimeIds = Object.entries(userAnimeList)
+      .filter(([_, status]) => status === 'completed')
+      .map(([id]) => parseInt(id));
+    
+    const totalEpisodes = completedAnimeIds.reduce((sum, animeId) => {
+      const anime = animeData.find(a => a.id === animeId);
+      return sum + (anime?.episodes || 0);
+    }, 0);
+    
+    const totalMinutes = totalEpisodes * 24;
+    const hours = Math.floor(totalMinutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    return { hours, days, episodes: totalEpisodes };
+  };
+
   const allGenres = Array.from(new Set(animeData.flatMap(anime => anime.genres)));
 
   const filteredAnime = animeData.filter(anime => {
@@ -326,6 +343,8 @@ const Index = () => {
               <TabsTrigger value="all">Все</TabsTrigger>
               <TabsTrigger value="trending">Популярное</TabsTrigger>
               <TabsTrigger value="new">Новинки</TabsTrigger>
+              <TabsTrigger value="top-year">Топ года</TabsTrigger>
+              <TabsTrigger value="top-month">Топ месяца</TabsTrigger>
               <TabsTrigger value="genres">Жанры</TabsTrigger>
               <TabsTrigger value="favorites">Избранное</TabsTrigger>
             </TabsList>
@@ -492,6 +511,164 @@ const Index = () => {
                         </Button>
                       </div>
                       <div className="absolute top-3 left-3">
+                        <Badge className="bg-primary/90 backdrop-blur">
+                          <Icon name="Star" size={14} className="mr-1" />
+                          {anime.rating}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-lg mb-2 line-clamp-1">{anime.title}</h3>
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {anime.genres.slice(0, 2).map(genre => (
+                          <Badge key={genre} variant="outline" className="text-xs">
+                            {genre}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Icon name="Film" size={14} />
+                          {anime.episodes} серий
+                        </span>
+                        <span>{anime.year}</span>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="top-year">
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold mb-2">🏆 Лучшие аниме 2024 года</h3>
+                <p className="text-muted-foreground">Самые высокооценённые аниме этого года</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredAnime
+                  .filter(a => a.year === 2024)
+                  .sort((a, b) => b.rating - a.rating)
+                  .map((anime, index) => (
+                  <Card 
+                    key={anime.id} 
+                    className="group overflow-hidden border-0 bg-card hover:shadow-xl transition-all duration-300 hover-scale cursor-pointer fade-in relative"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                    onClick={() => setSelectedAnime(anime)}
+                  >
+                    <div className="relative aspect-[2/3] overflow-hidden">
+                      <img 
+                        src={anime.image} 
+                        alt={anime.title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
+                      {index < 3 && (
+                        <div className="absolute top-3 left-3 z-10">
+                          <Badge className={`text-lg font-bold ${
+                            index === 0 ? 'bg-yellow-500' : 
+                            index === 1 ? 'bg-gray-400' : 
+                            'bg-amber-600'
+                          }`}>
+                            #{index + 1}
+                          </Badge>
+                        </div>
+                      )}
+                      <div className="absolute top-3 right-3">
+                        <Button
+                          size="icon"
+                          variant="secondary"
+                          className="rounded-full bg-background/80 backdrop-blur hover:bg-background"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(anime.id);
+                          }}
+                        >
+                          <Icon 
+                            name="Heart" 
+                            size={18}
+                            className={favorites.includes(anime.id) ? "fill-primary text-primary" : ""}
+                          />
+                        </Button>
+                      </div>
+                      <div className="absolute bottom-3 left-3">
+                        <Badge className="bg-primary/90 backdrop-blur">
+                          <Icon name="Star" size={14} className="mr-1" />
+                          {anime.rating}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-lg mb-2 line-clamp-1">{anime.title}</h3>
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {anime.genres.slice(0, 2).map(genre => (
+                          <Badge key={genre} variant="outline" className="text-xs">
+                            {genre}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Icon name="Film" size={14} />
+                          {anime.episodes} серий
+                        </span>
+                        <span>{anime.year}</span>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="top-month">
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold mb-2">🔥 Топ октября 2024</h3>
+                <p className="text-muted-foreground">Самые популярные аниме этого месяца</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredAnime
+                  .filter(a => a.status === 'ongoing')
+                  .sort((a, b) => b.rating - a.rating)
+                  .map((anime, index) => (
+                  <Card 
+                    key={anime.id} 
+                    className="group overflow-hidden border-0 bg-card hover:shadow-xl transition-all duration-300 hover-scale cursor-pointer fade-in relative"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                    onClick={() => setSelectedAnime(anime)}
+                  >
+                    <div className="relative aspect-[2/3] overflow-hidden">
+                      <img 
+                        src={anime.image} 
+                        alt={anime.title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
+                      {index < 3 && (
+                        <div className="absolute top-3 left-3 z-10">
+                          <Badge className={`text-lg font-bold ${
+                            index === 0 ? 'bg-yellow-500' : 
+                            index === 1 ? 'bg-gray-400' : 
+                            'bg-amber-600'
+                          }`}>
+                            #{index + 1}
+                          </Badge>
+                        </div>
+                      )}
+                      <div className="absolute top-3 right-3">
+                        <Button
+                          size="icon"
+                          variant="secondary"
+                          className="rounded-full bg-background/80 backdrop-blur hover:bg-background"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(anime.id);
+                          }}
+                        >
+                          <Icon 
+                            name="Heart" 
+                            size={18}
+                            className={favorites.includes(anime.id) ? "fill-primary text-primary" : ""}
+                          />
+                        </Button>
+                      </div>
+                      <div className="absolute bottom-3 left-3">
                         <Badge className="bg-primary/90 backdrop-blur">
                           <Icon name="Star" size={14} className="mr-1" />
                           {anime.rating}
@@ -806,6 +983,31 @@ const Index = () => {
             <DialogTitle className="text-2xl">Мой список аниме</DialogTitle>
           </DialogHeader>
           
+          <div className="mb-6 p-4 bg-gradient-to-r from-primary/10 to-purple-500/10 rounded-lg border border-primary/20">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="space-y-1">
+                <h3 className="text-lg font-semibold">Статистика просмотра</h3>
+                <div className="flex items-center gap-6 text-sm flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <Icon name="Clock" size={16} className="text-primary" />
+                    <span className="text-muted-foreground">Время:</span>
+                    <span className="font-bold text-foreground">{calculateWatchTime().hours} ч</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Icon name="Calendar" size={16} className="text-primary" />
+                    <span className="text-muted-foreground">Дней:</span>
+                    <span className="font-bold text-foreground">{calculateWatchTime().days}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Icon name="Film" size={16} className="text-primary" />
+                    <span className="text-muted-foreground">Серий:</span>
+                    <span className="font-bold text-foreground">{calculateWatchTime().episodes}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="flex gap-2 mb-4 flex-wrap">
             <Button 
               variant={userListFilter === 'all' ? 'default' : 'outline'} 
