@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface Anime {
   id: number;
@@ -18,6 +19,12 @@ interface Anime {
   description: string;
   year: number;
   status: string;
+}
+
+type WatchStatus = 'watching' | 'completed' | 'planned' | 'dropped' | 'on-hold';
+
+interface UserAnimeList {
+  [key: number]: WatchStatus;
 }
 
 const animeData: Anime[] = [
@@ -61,11 +68,65 @@ const Index = () => {
   const [favorites, setFavorites] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string>('all');
+  const [userAnimeList, setUserAnimeList] = useState<UserAnimeList>({
+    1: 'watching',
+    2: 'completed',
+  });
+  const [showUserListDialog, setShowUserListDialog] = useState(false);
+  const [userListFilter, setUserListFilter] = useState<WatchStatus | 'all'>('all');
 
   const toggleFavorite = (id: number) => {
     setFavorites(prev => 
       prev.includes(id) ? prev.filter(fav => fav !== id) : [...prev, id]
     );
+  };
+
+  const updateAnimeStatus = (animeId: number, status: WatchStatus) => {
+    setUserAnimeList(prev => ({
+      ...prev,
+      [animeId]: status
+    }));
+  };
+
+  const removeFromList = (animeId: number) => {
+    setUserAnimeList(prev => {
+      const newList = { ...prev };
+      delete newList[animeId];
+      return newList;
+    });
+  };
+
+  const getStatusLabel = (status: WatchStatus) => {
+    const labels: Record<WatchStatus, string> = {
+      'watching': 'Смотрю',
+      'completed': 'Просмотрено',
+      'planned': 'Запланировано',
+      'dropped': 'Брошено',
+      'on-hold': 'Отложено'
+    };
+    return labels[status];
+  };
+
+  const getStatusColor = (status: WatchStatus) => {
+    const colors: Record<WatchStatus, string> = {
+      'watching': 'bg-blue-500',
+      'completed': 'bg-green-500',
+      'planned': 'bg-purple-500',
+      'dropped': 'bg-red-500',
+      'on-hold': 'bg-yellow-500'
+    };
+    return colors[status];
+  };
+
+  const getUserAnimeByStatus = () => {
+    if (userListFilter === 'all') {
+      return Object.entries(userAnimeList);
+    }
+    return Object.entries(userAnimeList).filter(([_, status]) => status === userListFilter);
+  };
+
+  const getStatusCount = (status: WatchStatus) => {
+    return Object.values(userAnimeList).filter(s => s === status).length;
   };
 
   const allGenres = Array.from(new Set(animeData.flatMap(anime => anime.genres)));
@@ -109,9 +170,38 @@ const Index = () => {
               <Button variant="ghost" size="icon">
                 <Icon name="Heart" size={20} />
               </Button>
-              <Button variant="ghost" size="icon">
-                <Icon name="User" size={20} />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Icon name="User" size={20} />
+                    {Object.keys(userAnimeList).length > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                        {Object.keys(userAnimeList).length}
+                      </span>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuLabel>Мой профиль</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setShowUserListDialog(true)} className="cursor-pointer">
+                    <Icon name="Library" size={18} className="mr-2" />
+                    <div className="flex-1">
+                      <div className="font-medium">Мой список</div>
+                      <div className="text-xs text-muted-foreground">{Object.keys(userAnimeList).length} аниме</div>
+                    </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Icon name="Settings" size={18} className="mr-2" />
+                    Настройки
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Icon name="LogOut" size={18} className="mr-2" />
+                    Выйти
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
@@ -556,6 +646,37 @@ const Index = () => {
                       <Icon name="Play" size={20} className="mr-2" />
                       Смотреть
                     </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="lg">
+                          <Icon name="Plus" size={20} />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuLabel>Добавить в список</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => updateAnimeStatus(selectedAnime.id, 'watching')}>
+                          <Icon name="Eye" size={16} className="mr-2" />
+                          Смотрю
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => updateAnimeStatus(selectedAnime.id, 'completed')}>
+                          <Icon name="Check" size={16} className="mr-2" />
+                          Просмотрено
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => updateAnimeStatus(selectedAnime.id, 'planned')}>
+                          <Icon name="Clock" size={16} className="mr-2" />
+                          Запланировано
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => updateAnimeStatus(selectedAnime.id, 'on-hold')}>
+                          <Icon name="Pause" size={16} className="mr-2" />
+                          Отложено
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => updateAnimeStatus(selectedAnime.id, 'dropped')}>
+                          <Icon name="X" size={16} className="mr-2" />
+                          Брошено
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                     <Button 
                       variant="outline" 
                       size="lg"
@@ -575,6 +696,167 @@ const Index = () => {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showUserListDialog} onOpenChange={setShowUserListDialog}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">Мой список аниме</DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex gap-2 mb-4 flex-wrap">
+            <Button 
+              variant={userListFilter === 'all' ? 'default' : 'outline'} 
+              size="sm"
+              onClick={() => setUserListFilter('all')}
+            >
+              Все ({Object.keys(userAnimeList).length})
+            </Button>
+            <Button 
+              variant={userListFilter === 'watching' ? 'default' : 'outline'} 
+              size="sm"
+              onClick={() => setUserListFilter('watching')}
+            >
+              Смотрю ({getStatusCount('watching')})
+            </Button>
+            <Button 
+              variant={userListFilter === 'completed' ? 'default' : 'outline'} 
+              size="sm"
+              onClick={() => setUserListFilter('completed')}
+            >
+              Просмотрено ({getStatusCount('completed')})
+            </Button>
+            <Button 
+              variant={userListFilter === 'planned' ? 'default' : 'outline'} 
+              size="sm"
+              onClick={() => setUserListFilter('planned')}
+            >
+              Запланировано ({getStatusCount('planned')})
+            </Button>
+            <Button 
+              variant={userListFilter === 'on-hold' ? 'default' : 'outline'} 
+              size="sm"
+              onClick={() => setUserListFilter('on-hold')}
+            >
+              Отложено ({getStatusCount('on-hold')})
+            </Button>
+            <Button 
+              variant={userListFilter === 'dropped' ? 'default' : 'outline'} 
+              size="sm"
+              onClick={() => setUserListFilter('dropped')}
+            >
+              Брошено ({getStatusCount('dropped')})
+            </Button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
+            {getUserAnimeByStatus().length === 0 ? (
+              <div className="text-center py-12">
+                <Icon name="Library" size={48} className="mx-auto mb-4 text-muted-foreground" />
+                <p className="text-lg text-muted-foreground">Список пуст</p>
+                <p className="text-sm text-muted-foreground mt-2">Добавьте аниме в свой список</p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {getUserAnimeByStatus().map(([animeIdStr, status]) => {
+                  const animeId = parseInt(animeIdStr);
+                  const anime = animeData.find(a => a.id === animeId);
+                  if (!anime) return null;
+                  
+                  return (
+                    <Card key={animeId} className="p-4 hover:shadow-lg transition-shadow">
+                      <div className="flex gap-4">
+                        <img 
+                          src={anime.image} 
+                          alt={anime.title}
+                          className="w-24 h-36 object-cover rounded-lg cursor-pointer hover-scale"
+                          onClick={() => {
+                            setSelectedAnime(anime);
+                            setShowUserListDialog(false);
+                          }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <h3 
+                              className="font-semibold text-lg cursor-pointer hover:text-primary transition-colors"
+                              onClick={() => {
+                                setSelectedAnime(anime);
+                                setShowUserListDialog(false);
+                              }}
+                            >
+                              {anime.title}
+                            </h3>
+                            <Badge className={`${getStatusColor(status)} text-white shrink-0`}>
+                              {getStatusLabel(status)}
+                            </Badge>
+                          </div>
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {anime.genres.map(genre => (
+                              <Badge key={genre} variant="outline" className="text-xs">
+                                {genre}
+                              </Badge>
+                            ))}
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                            <span className="flex items-center gap-1">
+                              <Icon name="Star" className="text-yellow-400" size={14} />
+                              {anime.rating}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Icon name="Film" size={14} />
+                              {anime.episodes} серий
+                            </span>
+                            <span>{anime.year}</span>
+                          </div>
+                          <div className="flex gap-2">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button size="sm" variant="outline">
+                                  <Icon name="Edit" size={14} className="mr-1" />
+                                  Изменить статус
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => updateAnimeStatus(animeId, 'watching')}>
+                                  <Icon name="Eye" size={16} className="mr-2" />
+                                  Смотрю
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => updateAnimeStatus(animeId, 'completed')}>
+                                  <Icon name="Check" size={16} className="mr-2" />
+                                  Просмотрено
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => updateAnimeStatus(animeId, 'planned')}>
+                                  <Icon name="Clock" size={16} className="mr-2" />
+                                  Запланировано
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => updateAnimeStatus(animeId, 'on-hold')}>
+                                  <Icon name="Pause" size={16} className="mr-2" />
+                                  Отложено
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => updateAnimeStatus(animeId, 'dropped')}>
+                                  <Icon name="X" size={16} className="mr-2" />
+                                  Брошено
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => removeFromList(animeId)}
+                            >
+                              <Icon name="Trash2" size={14} className="mr-1" />
+                              Удалить
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
